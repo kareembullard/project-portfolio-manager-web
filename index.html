@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>Project Portfolio Manager</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Portfolio dashboard for 11 active initiatives — budgets, health scoring, financials, analytics, a wiki, and a built-in Smart Assistant. Single-file demo web app.">
+<meta name="description" content="Portfolio dashboard tracking 11 active initiatives with budgets, health scoring, financials, analytics, and a built-in Smart Assistant. Single-file demo web app.">
 <style>
   :root {
     --bg: #f7f8fa; --surface: #ffffff; --border: #e2e5ea; --text: #1a1d23; --text-dim: #6b7280;
@@ -46,9 +46,6 @@
   .tag.health-green { background: var(--ok-dim); color: var(--ok); border-color: transparent; }
   .tag.health-yellow { background: var(--warn-dim); color: var(--warn); border-color: transparent; }
   .tag.health-red { background: var(--bad-dim); color: var(--bad); border-color: transparent; }
-  .tag.type-warning { background: var(--warn-dim); color: var(--warn); border-color: transparent; }
-  .tag.type-success { background: var(--ok-dim); color: var(--ok); border-color: transparent; }
-  .tag.type-info { background: var(--accent-dim); color: var(--accent); border-color: transparent; }
   .count { color: var(--text-dim); font-weight: 400; font-size: .85rem; }
   .empty { color: var(--text-dim); font-style: italic; font-size: .88rem; padding: .3rem 0; }
   footer { margin-top: 2.5rem; text-align: center; font-size: .78rem; color: var(--text-dim); }
@@ -76,12 +73,12 @@
   .section h2 { font-size: 1.02rem; border-bottom: 2px solid var(--border); padding-bottom: .35rem; margin-bottom: .6rem; }
 
   .bar-row { display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem; font-size: .82rem; }
-  .bar-row .bar-label { width: 130px; flex-shrink: 0; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar-row .bar-label { width: 150px; flex-shrink: 0; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .bar-track { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 999px; height: 14px; overflow: hidden; }
   .bar-fill { height: 100%; background: var(--accent); border-radius: 999px; }
-  .bar-fill.over { background: var(--bad); }
   .bar-fill.warn { background: var(--warn); }
-  .bar-row .bar-val { width: 100px; text-align: right; flex-shrink: 0; color: var(--text-dim); }
+  .bar-fill.over { background: var(--bad); }
+  .bar-row .bar-val { width: 90px; text-align: right; flex-shrink: 0; color: var(--text-dim); }
 
   .avatar { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: var(--accent-dim); color: var(--accent); font-weight: 700; font-size: .8rem; flex-shrink: 0; }
 
@@ -92,27 +89,40 @@
   .edit-row .edit-field { flex: 1; min-width: 140px; }
   .edit-actions { display: flex; gap: .6rem; margin-top: 1rem; }
 
-  /* Wiki */
-  .wiki h2 { font-size: 1.15rem; margin: 1.6rem 0 .7rem; padding-bottom: .4rem; border-bottom: 2px solid var(--accent); }
+  /* Portfolio-manager-specific components */
+  .notice { display: flex; align-items: flex-start; gap: .6rem; padding: .6rem .8rem; border-radius: var(--radius); border-left: 4px solid var(--border); background: var(--surface); border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: .5rem; font-size: .85rem; }
+  .notice.warning { border-left-color: var(--warn); background: var(--warn-dim); color: var(--warn); }
+  .notice.success { border-left-color: var(--ok); background: var(--ok-dim); color: var(--ok); }
+  .notice.info { border-left-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+  .notice .msg { color: var(--text); flex: 1; }
+  .notice button.plink { background: none; border: none; padding: 0; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; color: inherit; }
+
+  .wiki h2 { font-size: 1.1rem; margin: 1.6rem 0 .6rem; padding-bottom: .3rem; border-bottom: 2px solid var(--border); }
   .wiki h2:first-child { margin-top: 0; }
-  .wiki h3 { font-size: 1rem; margin: 1.2rem 0 .5rem; }
-  .wiki p { color: var(--text-dim); line-height: 1.7; margin: 0 0 .8rem; }
-  .wiki ul { color: var(--text-dim); line-height: 1.65; padding-left: 1.3rem; margin: 0 0 .8rem; }
-  .wiki li { margin-bottom: .3rem; }
-  .wiki table { width: 100%; border-collapse: collapse; margin: .8rem 0; font-size: .82rem; }
+  .wiki h3 { font-size: .95rem; margin: 1.1rem 0 .4rem; }
+  .wiki p, .wiki li { color: var(--text-dim); font-size: .88rem; line-height: 1.7; }
+  .wiki ul { margin: 0 0 .8rem; padding-left: 1.2rem; }
+  .wiki table { width: 100%; border-collapse: collapse; margin: .6rem 0 1rem; font-size: .82rem; }
   .wiki th, .wiki td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid var(--border); }
   .wiki th { color: var(--text); font-weight: 600; background: var(--bg); }
-  .phase-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: .6rem; margin: .8rem 0; }
-  .phase-chip { border: 1px solid var(--border); border-radius: var(--radius); padding: .55rem .65rem; font-size: .78rem; display: flex; align-items: center; gap: .4rem; background: var(--surface); }
-  .phase-chip .n { color: var(--accent); font-weight: 700; font-family: ui-monospace, monospace; }
+  .phase-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: .5rem; margin: .6rem 0 1rem; }
+  .phase-chip { border: 1px solid var(--border); border-radius: var(--radius); padding: .5rem .6rem; font-size: .78rem; display: flex; align-items: center; gap: .4rem; background: var(--surface); }
+  .phase-chip .n { color: var(--accent); font-weight: 700; }
 
-  /* Smart Assistant */
-  .chat-log { display: flex; flex-direction: column; gap: .6rem; max-height: 340px; overflow-y: auto; padding: .2rem; margin-bottom: .8rem; }
-  .chat-msg { max-width: 85%; padding: .55rem .8rem; border-radius: 12px; font-size: .85rem; line-height: 1.5; }
-  .chat-msg.assistant { background: var(--bg); border: 1px solid var(--border); align-self: flex-start; border-bottom-left-radius: 3px; }
-  .chat-msg.user { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 3px; }
-  .chat-chips { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: .7rem; }
-  .chat-input-row { display: flex; gap: .5rem; }
+  .assist-fab { position: fixed; bottom: 1.5rem; right: 1.5rem; width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: #fff; border: none; box-shadow: 0 6px 18px rgba(0,0,0,.25); cursor: pointer; font-size: 1.3rem; z-index: 500; }
+  .assist-panel { position: fixed; top: 0; right: 0; width: 340px; max-width: 92vw; height: 100%; background: var(--surface); border-left: 1px solid var(--border); box-shadow: -8px 0 24px rgba(0,0,0,.18); z-index: 600; display: flex; flex-direction: column; transform: translateX(100%); transition: transform .25s ease; }
+  .assist-panel.open { transform: translateX(0); }
+  .assist-head { display: flex; align-items: center; justify-content: space-between; padding: .9rem 1rem; border-bottom: 1px solid var(--border); }
+  .assist-head h3 { margin: 0; font-size: .95rem; }
+  .assist-body { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: .6rem; }
+  .msg { max-width: 88%; padding: .5rem .75rem; border-radius: 10px; font-size: .82rem; line-height: 1.5; white-space: pre-line; }
+  .msg.assistant { background: var(--bg); border: 1px solid var(--border); align-self: flex-start; }
+  .msg.user { background: var(--accent); color: #fff; align-self: flex-end; }
+  .assist-chips { display: flex; gap: .4rem; flex-wrap: wrap; padding: 0 1rem .6rem; }
+  .assist-chips button { font-size: .72rem; padding: .3rem .6rem; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text); cursor: pointer; }
+  .assist-chips button:hover { border-color: var(--accent); color: var(--accent); }
+  .assist-input { display: flex; gap: .5rem; padding: .8rem 1rem; border-top: 1px solid var(--border); }
+  .assist-input input { flex: 1; }
 </style>
 </head>
 <body>
@@ -189,9 +199,9 @@
 })();
 </script>
 <div class="wrap">
-  <h1>📊 Project Portfolio Manager</h1>
-  <p class="sub">11 active initiatives tracked with budgets, health scoring, financials, analytics, a project wiki, and an offline Smart Assistant.</p>
-  <div class="privacy-note">This is a portfolio demo. All data (projects, alerts, tasks, financials) is fictional sample data, seeded on first load. Everything is editable — add/edit/delete projects, tasks, and alerts, adjust portfolio targets. Edits save to <em>your</em> browser only (<code>localStorage</code>); nothing is ever sent to a server. Use Reset in the toolbar to restore the original demo data.</div>
+  <h1>👑 Project Portfolio Manager</h1>
+  <p class="sub">11 active initiatives tracked with budgets, health scoring, financials, analytics, and a built-in Smart Assistant.</p>
+  <div class="privacy-note">This is a portfolio demo. All data (projects, tasks, alerts, financials) is fictional sample data, seeded on first load. Everything is editable — add/edit/delete projects, tasks, and alerts, and adjust portfolio targets in Settings. Edits save to <em>your</em> browser only (<code>localStorage</code>); nothing is ever sent to a server. Use Reset in the toolbar to restore the original demo data.</div>
 
   <div class="edit-toolbar" id="edit-toolbar"></div>
 
@@ -211,6 +221,14 @@
   </footer>
 </div>
 
+<button class="assist-fab" id="assistFab" title="Smart Assistant">✨</button>
+<div class="assist-panel" id="assistPanel">
+  <div class="assist-head"><h3>✨ Smart Assistant</h3><button class="btn small" id="assistClose">✕</button></div>
+  <div class="assist-body" id="assistBody"></div>
+  <div class="assist-chips" id="assistChips"></div>
+  <div class="assist-input"><input id="assistInput" type="text" placeholder="Ask about your portfolio…" autocomplete="off"><button class="btn primary small" id="assistSend">Send</button></div>
+</div>
+
 <script>
 const STORAGE_KEY = "project-portfolio-manager-web:data";
 const HEALTHS = ["green", "yellow", "red"];
@@ -219,24 +237,18 @@ const PRIORITIES = ["High", "Medium", "Low"];
 const ALERT_TYPES = ["warning", "success", "info"];
 
 const SEED = {
-  settings: { portfolioHealth: 8.1, revenueTarget: 5000, currentRevenue: 4150, resourceUtilization: 87 },
   projects: [
-    { id: "GDCCSI-2025", name: "Gem Dropper's Content Initiative", phase: "Network, Conduct", health: "green", completion: 65, budget: 3500, spent: 2100, lead: "Kareem B.", endDate: "2025-06-31", nextMilestone: "Finalize Ebook Task Lists" },
-    { id: "SALES-2025", name: "Digital Products Sales Target", phase: "Conduct, Control", health: "green", completion: 83, budget: 1000, spent: 450, lead: "Kareem B.", endDate: "2025-07-01", nextMilestone: "Final Q3 Push" },
-    { id: "CANNON-2025", name: "Get in the Cannon Project", phase: "Market, Conduct", health: "green", completion: 40, budget: 5000, spent: 1500, lead: "Kareem B.", endDate: "2025-12-31", nextMilestone: "MVP Launch" },
-    { id: "NCA-2025", name: "Networking & Client Acquisition", phase: "Conduct", health: "green", completion: 50, budget: 2500, spent: 1000, lead: "Kareem B.", endDate: "2025-12-31", nextMilestone: "Sign 5 New Clients" },
-    { id: "AMLS-2025", name: "Airtable Multi-Layered System", phase: "Setup", health: "green", completion: 90, budget: 1200, spent: 1100, lead: "Kareem B.", endDate: "2025-08-30", nextMilestone: "Deploy Dashboard v1" },
-    { id: "MEMOIR-2025", name: "Memoir Writing", phase: "Document, Develop", health: "green", completion: 15, budget: 500, spent: 50, lead: "Kareem B.", endDate: "2026-12-31", nextMilestone: "Complete First Draft" },
-    { id: "CREATIVE-2025", name: "Creative Resurgence Epic", phase: "Conduct", health: "green", completion: 70, budget: 3000, spent: 1800, lead: "Kareem B.", endDate: "2025-12-31", nextMilestone: "Gallery Showcase" },
-    { id: "CERT-2026", name: "Professional Certifications Renewal", phase: "Conduct, Educate", health: "yellow", completion: 20, budget: 800, spent: 150, lead: "Kareem B.", endDate: "2026-02-01", nextMilestone: "Pass CompTIA A+ Exam" },
-    { id: "Suno-EXP-2025", name: "Suno Export & Music Management", phase: "Conduct", health: "green", completion: 55, budget: 2000, spent: 900, lead: "Kareem B.", endDate: "2025-12-31", nextMilestone: "Release 10 Edited Tracks" },
-    { id: "TMB-2025", name: "Automation & Bot Development", phase: "Develop, Setup", health: "green", completion: 45, budget: 1500, spent: 600, lead: "Kareem B.", endDate: "2025-11-30", nextMilestone: "Deploy Task Merging Bot" },
-    { id: "CH7-BK-2025", name: "Financial Management (CH7-BK-2025)", phase: "Setup, Conduct", health: "yellow", completion: 30, budget: 2000, spent: 1800, lead: "Kareem B.", endDate: "2025-12-31", nextMilestone: "Finalize Bankruptcy Process" }
-  ],
-  alerts: [
-    { id: "AL1", type: "warning", message: "CERT-2026 certification deadline is approaching (Feb 1, 2026)." },
-    { id: "AL2", type: "warning", message: "CH7-BK-2025 has high budget utilization. Review spending." },
-    { id: "AL3", type: "success", message: "AMLS-2025 is ahead of schedule - early completion expected." }
+    { id: "GDCCSI-2025", name: "Gem Dropper's Content Initiative", phase: "Network, Conduct", health: "green", status: "On Track", completion: 65, budget: 3500, spent: 2100, lead: "Kareem B.", endDate: "2025-06-31", nextMilestone: "Finalize Ebook Task Lists" },
+    { id: "SALES-2025", name: "Digital Products Sales Target", phase: "Conduct, Control", health: "green", status: "On Track", completion: 83, budget: 1000, spent: 450, lead: "Kareem B.", endDate: "2025-07-01", nextMilestone: "Final Q3 Push" },
+    { id: "CANNON-2025", name: "Get in the Cannon Project", phase: "Market, Conduct", health: "green", status: "In Progress", completion: 40, budget: 5000, spent: 1500, lead: "Kareem B.", endDate: "2025-12-31", nextMilestone: "MVP Launch" },
+    { id: "NCA-2025", name: "Networking & Client Acquisition", phase: "Conduct", health: "green", status: "In Progress", completion: 50, budget: 2500, spent: 1000, lead: "Kareem B.", endDate: "2025-12-31", nextMilestone: "Sign 5 New Clients" },
+    { id: "AMLS-2025", name: "Airtable Multi-Layered System", phase: "Setup", health: "green", status: "On Track", completion: 90, budget: 1200, spent: 1100, lead: "Kareem B.", endDate: "2025-08-30", nextMilestone: "Deploy Dashboard v1" },
+    { id: "MEMOIR-2025", name: "Memoir Writing", phase: "Document, Develop", health: "green", status: "In Progress", completion: 15, budget: 500, spent: 50, lead: "Kareem B.", endDate: "2026-12-31", nextMilestone: "Complete First Draft" },
+    { id: "CREATIVE-2025", name: "Creative Resurgence Epic", phase: "Conduct", health: "green", status: "On Track", completion: 70, budget: 3000, spent: 1800, lead: "Kareem B.", endDate: "2025-12-31", nextMilestone: "Gallery Showcase" },
+    { id: "CERT-2026", name: "Professional Certifications Renewal", phase: "Conduct, Educate", health: "yellow", status: "At Risk", completion: 20, budget: 800, spent: 150, lead: "Kareem B.", endDate: "2026-02-01", nextMilestone: "Pass CompTIA A+ Exam" },
+    { id: "Suno-EXP-2025", name: "Suno Export & Music Management", phase: "Conduct", health: "green", status: "On Track", completion: 55, budget: 2000, spent: 900, lead: "Kareem B.", endDate: "2025-12-31", nextMilestone: "Release 10 Edited Tracks" },
+    { id: "TMB-2025", name: "Automation & Bot Development", phase: "Develop, Setup", health: "green", status: "In Progress", completion: 45, budget: 1500, spent: 600, lead: "Kareem B.", endDate: "2025-11-30", nextMilestone: "Deploy Task Merging Bot" },
+    { id: "CH7-BK-2025", name: "Financial Management (CH7-BK-2025)", phase: "Setup, Conduct", health: "yellow", status: "At Risk", completion: 30, budget: 2000, spent: 1800, lead: "Kareem B.", endDate: "2025-12-31", nextMilestone: "Finalize Bankruptcy Process" },
   ],
   tasks: [
     { id: "T47", name: "CompTIA A+ ce Certification Renewal", project: "CERT-2026", dueDate: "2026-02-01", priority: "High" },
@@ -246,19 +258,24 @@ const SEED = {
     { id: "T1173", name: "Meal Prep Veggies Every Sunday", project: "Personal", dueDate: "2025-07-27", priority: "Medium" },
     { id: "T96", name: "Prospect Freelance Listings", project: "NCA-2025", dueDate: "2025-07-26", priority: "High" },
     { id: "T70", name: "Write Memoir (Church Memories)", project: "MEMOIR-2025", dueDate: "2025-07-27", priority: "Low" },
-    { id: "T53", name: "Organize/Export Suno Creations", project: "Suno-EXP-2025", dueDate: "2025-12-31", priority: "Medium" }
+    { id: "T53", name: "Organize/Export Suno Creations", project: "Suno-EXP-2025", dueDate: "2025-12-31", priority: "Medium" },
   ],
-  revenueData: [
-    { id: "R1", month: "Jan", revenue: 150 }, { id: "R2", month: "Feb", revenue: 320 }, { id: "R3", month: "Mar", revenue: 580 },
-    { id: "R4", month: "Apr", revenue: 950 }, { id: "R5", month: "May", revenue: 1250 }, { id: "R6", month: "Jun", revenue: 2100 }, { id: "R7", month: "Jul", revenue: 4150 }
+  alerts: [
+    { id: "A1", type: "warning", message: "CERT-2026 certification deadline is approaching (Feb 1, 2026)." },
+    { id: "A2", type: "warning", message: "CH7-BK-2025 has high budget utilization. Review spending." },
+    { id: "A3", type: "success", message: "AMLS-2025 is ahead of schedule - early completion expected." },
   ],
-  budgetAllocation: [
-    { id: "B1", name: "Content (GDCCSI)", value: 25 },
-    { id: "B2", name: "Marketing (CANNON)", value: 35 },
-    { id: "B3", name: "Systems (AMLS, TMB)", value: 20 },
-    { id: "B4", name: "Creative (Suno, CREATIVE)", value: 15 },
-    { id: "B5", name: "Other", value: 5 }
-  ]
+  financials: {
+    revenueData: [
+      { name: "Jan", revenue: 150 }, { name: "Feb", revenue: 320 }, { name: "Mar", revenue: 580 },
+      { name: "Apr", revenue: 950 }, { name: "May", revenue: 1250 }, { name: "Jun", revenue: 2100 }, { name: "Jul", revenue: 4150 },
+    ],
+    budgetAllocation: [
+      { name: "Content (GDCCSI)", value: 25 }, { name: "Marketing (CANNON)", value: 35 },
+      { name: "Systems (AMLS, TMB)", value: 20 }, { name: "Creative (Suno, CREATIVE)", value: 15 }, { name: "Other", value: 5 },
+    ],
+  },
+  settings: { portfolioHealth: 8.1, revenueTarget: 5000, currentRevenue: 4150, resourceUtilization: 87 },
 };
 
 function loadState() {
@@ -266,7 +283,7 @@ function loadState() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return structuredCloneish(SEED);
     const parsed = JSON.parse(raw);
-    if (!parsed.projects || !parsed.tasks || !parsed.alerts || !parsed.settings) return structuredCloneish(SEED);
+    if (!parsed.projects || !parsed.tasks || !parsed.alerts || !parsed.financials || !parsed.settings) return structuredCloneish(SEED);
     return parsed;
   } catch { return structuredCloneish(SEED); }
 }
@@ -275,21 +292,22 @@ function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 function resetState() { state = structuredCloneish(SEED); saveState(); render(); }
 
 let state = loadState();
-let nextIdCounter = { PRJ: 100, T: 2000, AL: 100, R: 100, B: 100 };
+let nextIdCounter = { T: 2000, A: 100 };
 function nextId(prefix) { return prefix + (nextIdCounter[prefix]++); }
 
 function findProject(id) { return state.projects.find(p => p.id === id); }
 function findTask(id) { return state.tasks.find(t => t.id === id); }
 function findAlert(id) { return state.alerts.find(a => a.id === id); }
-function findRevenueRow(id) { return state.revenueData.find(r => r.id === id); }
-function findBudgetRow(id) { return state.budgetAllocation.find(b => b.id === id); }
 function money(n) { return "$" + Number(n || 0).toLocaleString("en-US"); }
 function initials(name) { return String(name || "?").split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase(); }
 
 const app = document.getElementById("app");
 const topNav = document.getElementById("top-nav");
 
-function goRoute(route) { location.hash = "#/" + route; }
+function goRoute(route) {
+  const newHash = "#/" + route;
+  if (location.hash === newHash) render(); else location.hash = newHash;
+}
 
 function render() {
   const route = (location.hash.replace(/^#\/?/, "") || "dashboard").split("/")[0];
@@ -329,7 +347,7 @@ function renderEditToolbar() {
     reader.onload = () => {
       try {
         const parsed = JSON.parse(reader.result);
-        if (parsed.projects && parsed.tasks && parsed.alerts && parsed.settings) { state = parsed; saveState(); render(); }
+        if (parsed.projects && parsed.tasks && parsed.alerts && parsed.financials && parsed.settings) { state = parsed; saveState(); render(); }
         else alert("That file doesn't look like project-portfolio-manager data.");
       } catch { alert("Couldn't parse that file."); }
     };
@@ -342,11 +360,18 @@ function renderEditToolbar() {
   bar.append(exportBtn, importBtn, fileInput, resetBtn);
 }
 
+function statCard(label, num) {
+  const card = document.createElement("div"); card.className = "stat-card";
+  card.innerHTML = `<div class="num"></div><div class="label"></div>`;
+  card.querySelector(".num").textContent = num;
+  card.querySelector(".label").textContent = label;
+  return card;
+}
 function emptyMsg(text) { const d = document.createElement("div"); d.className = "empty"; d.textContent = text; return d; }
 function tag(text, cls) { return `<span class="tag ${cls || ""}">${text}</span>`; }
-function barRow(label, val, max, valText) {
+function barRow(label, val, max, valText, cls) {
   const row = document.createElement("div"); row.className = "bar-row";
-  row.innerHTML = `<span class="bar-label"></span><span class="bar-track"><span class="bar-fill" style="width:${max ? Math.min(100, Math.round((val / max) * 100)) : 0}%"></span></span><span class="bar-val"></span>`;
+  row.innerHTML = `<span class="bar-label"></span><span class="bar-track"><span class="bar-fill${cls ? " " + cls : ""}" style="width:${max ? Math.min(100, Math.round((val / max) * 100)) : 0}%"></span></span><span class="bar-val"></span>`;
   row.querySelector(".bar-label").textContent = label;
   row.querySelector(".bar-val").textContent = valText;
   return row;
@@ -357,11 +382,13 @@ function pillGroup(label, values, stateSet, onChange) {
   group.querySelector(".fg-label").textContent = label;
   const scroll = document.createElement("div"); scroll.className = "pill-scroll";
   values.forEach(v => {
+    const val = (v && typeof v === "object") ? v.value : v;
+    const label2 = (v && typeof v === "object") ? v.label : v;
     const pill = document.createElement("button"); pill.type = "button";
-    pill.className = "pill" + (stateSet.has(v) ? " active" : "");
-    pill.textContent = v;
+    pill.className = "pill" + (stateSet.has(val) ? " active" : "");
+    pill.textContent = label2;
     pill.addEventListener("click", () => {
-      if (stateSet.has(v)) stateSet.delete(v); else stateSet.add(v);
+      if (stateSet.has(val)) stateSet.delete(val); else stateSet.add(val);
       pill.classList.toggle("active"); onChange();
     });
     scroll.appendChild(pill);
@@ -370,166 +397,88 @@ function pillGroup(label, values, stateSet, onChange) {
   return group;
 }
 
-// ---------- shared: project row ----------
-function projectRow(p) {
-  const li = document.createElement("li"); li.className = "entity";
-  const left = document.createElement("div");
-  left.innerHTML = `<div class="main"></div><div class="meta"></div>`;
-  left.querySelector(".main").textContent = p.name;
-  left.querySelector(".meta").textContent = `${p.id} · ${p.phase} · ${p.completion}% complete · ${money(p.spent)} / ${money(p.budget)} · due ${p.endDate}`;
-  left.insertAdjacentHTML("beforeend", tag(HEALTH_LABEL[p.health], "health-" + p.health));
-  li.appendChild(left);
-  const actions = document.createElement("div"); actions.className = "actions";
-  const editBtn = document.createElement("button"); editBtn.className = "btn small"; editBtn.textContent = "Edit";
-  editBtn.addEventListener("click", () => openProjectForm(p.id));
-  actions.appendChild(editBtn);
-  li.appendChild(actions);
-  return li;
+function healthCounts() {
+  const c = { green: 0, yellow: 0, red: 0 };
+  state.projects.forEach(p => { c[p.health] = (c[p.health] || 0) + 1; });
+  return c;
 }
 
 // ---------- Dashboard ----------
 function renderDashboard() {
   app.innerHTML = "";
-  const hc = { green: 0, yellow: 0, red: 0 };
-  state.projects.forEach(p => { hc[p.health] = (hc[p.health] || 0) + 1; });
+  const hc = healthCounts();
   const s = state.settings;
 
   const statGrid = document.createElement("div"); statGrid.className = "stat-grid";
-  [
-    ["Portfolio Health", s.portfolioHealth.toFixed(1) + " / 10"],
-    ["Revenue", money(s.currentRevenue) + " / " + money(s.revenueTarget)],
-    ["On Track", hc.green],
-    ["At Risk", hc.yellow],
-    ["Off Track", hc.red],
-    ["Resource Utilization", s.resourceUtilization + "%"],
-  ].forEach(([label, num]) => {
-    const card = document.createElement("div"); card.className = "stat-card";
-    card.innerHTML = `<div class="num"></div><div class="label"></div>`;
-    card.querySelector(".num").textContent = num;
-    card.querySelector(".label").textContent = label;
-    statGrid.appendChild(card);
-  });
+  statGrid.append(
+    statCard("Portfolio Health", s.portfolioHealth.toFixed(1) + "/10"),
+    statCard("Revenue", money(s.currentRevenue) + " / " + money(s.revenueTarget)),
+    statCard("On Track", hc.green),
+    statCard("At Risk", hc.yellow),
+    statCard("Off Track", hc.red),
+    statCard("Active Projects", state.projects.length),
+  );
   app.appendChild(statGrid);
 
-  const alertSec = document.createElement("div"); alertSec.className = "section";
-  alertSec.innerHTML = `<h2>Critical Alerts <span class="count">(${state.alerts.length})</span></h2>`;
-  app.appendChild(alertSec);
-  if (!state.alerts.length) alertSec.appendChild(emptyMsg("No alerts right now."));
-  const alertUl = document.createElement("ul"); alertUl.className = "entities";
-  state.alerts.forEach(a => alertUl.appendChild(alertRow(a)));
-  alertSec.appendChild(alertUl);
+  const alertSection = document.createElement("div"); alertSection.className = "section";
+  alertSection.innerHTML = `<h2>Critical Alerts <span class="count">(${state.alerts.length})</span></h2>`;
+  app.appendChild(alertSection);
+  if (!state.alerts.length) alertSection.appendChild(emptyMsg("No alerts right now."));
+  state.alerts.forEach(a => alertSection.appendChild(noticeRow(a)));
 
-  const projSec = document.createElement("div"); projSec.className = "section";
-  projSec.innerHTML = `<h2>Active Projects <span class="count">(${state.projects.length})</span></h2>`;
-  app.appendChild(projSec);
-  const addBtn = document.createElement("button"); addBtn.className = "btn primary"; addBtn.textContent = "+ New Project";
-  addBtn.addEventListener("click", () => openProjectForm(null));
-  projSec.appendChild(addBtn);
-  const projUl = document.createElement("ul"); projUl.className = "entities"; projUl.style.marginTop = ".7rem";
-  state.projects.forEach(p => projUl.appendChild(projectRow(p)));
-  projSec.appendChild(projUl);
+  const projSection = document.createElement("div"); projSection.className = "section";
+  projSection.innerHTML = `<h2>Active Projects <span class="count">(${state.projects.length})</span></h2>`;
+  app.appendChild(projSection);
+  const ul = document.createElement("ul"); ul.className = "entities";
+  state.projects.forEach(p => ul.appendChild(projectSummaryRow(p)));
+  projSection.appendChild(ul);
 
-  const finSec = document.createElement("div"); finSec.className = "section";
-  finSec.innerHTML = "<h2>Revenue Trend</h2>";
-  app.appendChild(finSec);
-  const revMax = Math.max(...state.revenueData.map(r => r.revenue), 1);
-  state.revenueData.forEach(r => finSec.appendChild(barRow(r.month, r.revenue, revMax, money(r.revenue))));
+  const finSection = document.createElement("div"); finSection.className = "section";
+  finSection.innerHTML = "<h2>Revenue Trend</h2>";
+  app.appendChild(finSection);
+  const revMax = Math.max(...state.financials.revenueData.map(d => d.revenue), 1);
+  state.financials.revenueData.forEach(d => finSection.appendChild(barRow(d.name, d.revenue, revMax, money(d.revenue))));
 
-  renderAssistant(app);
+  const allocSection = document.createElement("div"); allocSection.className = "section";
+  allocSection.innerHTML = "<h2>Budget Allocation</h2>";
+  app.appendChild(allocSection);
+  const allocMax = Math.max(...state.financials.budgetAllocation.map(d => d.value), 1);
+  state.financials.budgetAllocation.forEach(d => allocSection.appendChild(barRow(d.name, d.value, allocMax, d.value + "%")));
 }
 
-function alertRow(a) {
+function noticeRow(a) {
+  const div = document.createElement("div"); div.className = "notice " + a.type;
+  const msgSpan = document.createElement("span"); msgSpan.className = "msg";
+  const parts = a.message.split(/([A-Za-z]{3,10}-\d{4})/g);
+  parts.forEach(part => {
+    if (findProject(part)) {
+      const btn = document.createElement("button"); btn.className = "plink"; btn.type = "button"; btn.textContent = part;
+      btn.addEventListener("click", () => { location.hash = "#/projects"; setTimeout(() => openProjectForm(part), 0); });
+      msgSpan.appendChild(btn);
+    } else {
+      msgSpan.appendChild(document.createTextNode(part));
+    }
+  });
+  div.appendChild(msgSpan);
+  return div;
+}
+
+function projectSummaryRow(p) {
   const li = document.createElement("li"); li.className = "entity";
-  const left = document.createElement("div");
-  left.innerHTML = `<div class="main"></div>`;
-  left.querySelector(".main").textContent = a.message;
-  left.insertAdjacentHTML("beforeend", tag(a.type, "type-" + a.type));
+  const left = document.createElement("div"); left.style.flex = "1"; left.style.minWidth = "220px";
+  left.innerHTML = `<div class="main"></div><div class="meta"></div>`;
+  left.querySelector(".main").textContent = p.name;
+  left.querySelector(".meta").textContent = `${p.id} · ${p.phase} · Due ${p.endDate}`;
+  left.insertAdjacentHTML("beforeend", tag(HEALTH_LABEL[p.health], "health-" + p.health));
   li.appendChild(left);
-  const actions = document.createElement("div"); actions.className = "actions";
-  const editBtn = document.createElement("button"); editBtn.className = "btn small"; editBtn.textContent = "Edit";
-  editBtn.addEventListener("click", () => openAlertForm(a.id));
-  actions.appendChild(editBtn);
-  li.appendChild(actions);
+  const barWrap = document.createElement("div"); barWrap.style.width = "220px";
+  barWrap.appendChild(barRow(p.completion + "%", p.completion, 100, money(p.spent) + "/" + money(p.budget)));
+  li.appendChild(barWrap);
   return li;
 }
 
-// ---------- Smart Assistant ----------
-let assistLog = [
-  { role: "assistant", html: "Hello! I'm your portfolio assistant. Ask me about projects, budgets, health, or deadlines — or tap a suggestion below." }
-];
-function assistAnswer(q) {
-  q = q.toLowerCase();
-  const P = state.projects;
-  const tot = k => P.reduce((s, p) => s + p[k], 0);
-  if (/at.?risk|yellow|concern|attention/.test(q)) {
-    const r = P.filter(p => p.health !== "green");
-    return r.length ? `<strong>${r.length} projects need attention:</strong><br>` + r.map(p => `• ${p.id} — ${p.name} (${HEALTH_LABEL[p.health]})`).join("<br>") : "Good news — every project is currently On Track.";
-  }
-  if (/budget|spent|cost|money|utili/.test(q)) {
-    const b = tot("budget"), sp = tot("spent");
-    const over = P.filter(p => p.budget && p.spent / p.budget >= 0.9);
-    return `Total budget is <strong>${money(b)}</strong>, with <strong>${money(sp)}</strong> spent (${b ? Math.round(sp / b * 100) : 0}% used). ` + (over.length ? "Watch: " + over.map(p => p.id).join(", ") + " near/over budget." : "No projects are over budget.");
-  }
-  if (/health|score/.test(q)) return `Portfolio health is <strong>${state.settings.portfolioHealth.toFixed(1)}/10</strong>. Resource utilization is ${state.settings.resourceUtilization}%.`;
-  if (/revenue|target|sales/.test(q)) return `Revenue is <strong>${money(state.settings.currentRevenue)}</strong> of a ${money(state.settings.revenueTarget)} target (${state.settings.revenueTarget ? Math.round(state.settings.currentRevenue / state.settings.revenueTarget * 100) : 0}%).`;
-  if (/how many|count|number of|list.*project|all project/.test(q)) {
-    return `There are <strong>${P.length} active projects</strong>. Top by completion: ` + P.slice().sort((a, b) => b.completion - a.completion).slice(0, 3).map(p => `${p.id} (${p.completion}%)`).join(", ") + ".";
-  }
-  if (/milestone|due|task|deadline|upcoming/.test(q)) {
-    const t = state.tasks.filter(x => x.priority === "High");
-    return t.length ? `<strong>High-priority items:</strong><br>` + t.map(x => `• ${x.name} (${x.dueDate})`).join("<br>") : "No high-priority tasks right now.";
-  }
-  if (/on track|green|good|healthy/.test(q)) {
-    const g = P.filter(p => p.health === "green");
-    return `<strong>${g.length} projects are On Track.</strong> ` + g.slice(0, 4).map(p => p.id).join(", ") + (g.length > 4 ? "…" : "");
-  }
-  return "I can help with your portfolio. Try asking about <strong>at-risk projects</strong>, <strong>budget</strong>, <strong>portfolio health</strong>, <strong>revenue</strong>, or <strong>upcoming deadlines</strong>.";
-}
-function renderAssistant(container) {
-  const sec = document.createElement("div"); sec.className = "section";
-  sec.innerHTML = "<h2>Smart Assistant</h2>";
-  container.appendChild(sec);
-
-  const log = document.createElement("div"); log.className = "chat-log";
-  sec.appendChild(log);
-  function drawLog() {
-    log.innerHTML = "";
-    assistLog.forEach(m => {
-      const div = document.createElement("div"); div.className = "chat-msg " + m.role; div.innerHTML = m.html;
-      log.appendChild(div);
-    });
-    log.scrollTop = log.scrollHeight;
-  }
-  drawLog();
-
-  const chips = document.createElement("div"); chips.className = "chat-chips";
-  sec.appendChild(chips);
-  ["At-risk projects", "Budget summary", "Portfolio health", "Upcoming deadlines"].forEach(c => {
-    const b = document.createElement("button"); b.type = "button"; b.className = "pill"; b.textContent = c;
-    b.addEventListener("click", () => ask(c));
-    chips.appendChild(b);
-  });
-
-  const row = document.createElement("div"); row.className = "chat-input-row";
-  sec.appendChild(row);
-  const input = document.createElement("input"); input.type = "text"; input.placeholder = "Ask about your portfolio…";
-  const sendBtn = document.createElement("button"); sendBtn.className = "btn primary"; sendBtn.textContent = "Send";
-  row.append(input, sendBtn);
-
-  function ask(text) {
-    const v = (text || input.value).trim(); if (!v) return;
-    assistLog.push({ role: "user", html: escHtml(v) });
-    input.value = "";
-    drawLog();
-    setTimeout(() => { assistLog.push({ role: "assistant", html: assistAnswer(v) }); drawLog(); }, 200);
-  }
-  sendBtn.addEventListener("click", () => ask());
-  input.addEventListener("keydown", e => { if (e.key === "Enter") ask(); });
-}
-function escHtml(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
-
 // ---------- Projects ----------
-const projectFilterState = { health: new Set(), query: "" };
+const projectFilterState = { health: new Set(), query: "", sort: "name" };
 function renderProjects() {
   app.innerHTML = "";
   const h2 = document.createElement("h2");
@@ -542,19 +491,20 @@ function renderProjects() {
 
   const filterBar = document.createElement("div"); filterBar.className = "filter-bar";
   app.appendChild(filterBar);
-  filterBar.appendChild(pillGroup("Health", HEALTHS, projectFilterState.health, () => draw()));
+  filterBar.appendChild(pillGroup("Health", HEALTHS.map(h => ({ value: h, label: HEALTH_LABEL[h] })), projectFilterState.health, () => draw()));
 
-  const sortRow = document.createElement("div"); sortRow.className = "filter-group"; sortRow.style.marginBottom = "1rem";
-  sortRow.innerHTML = `<span class="fg-label">Sort by</span>`;
+  const sortGroup = document.createElement("div"); sortGroup.className = "filter-group";
+  sortGroup.innerHTML = `<span class="fg-label">Sort by</span>`;
   const sortSelect = document.createElement("select");
   [["name", "Project Name"], ["completion", "Completion %"], ["endDate", "Due Date"], ["budget", "Budget"]].forEach(([v, l]) => {
-    const o = document.createElement("option"); o.value = v; o.textContent = l; sortSelect.appendChild(o);
+    const o = document.createElement("option"); o.value = v; o.textContent = l; if (v === projectFilterState.sort) o.selected = true; sortSelect.appendChild(o);
   });
-  sortSelect.addEventListener("change", draw);
-  sortRow.appendChild(sortSelect);
-  app.appendChild(sortRow);
+  sortSelect.addEventListener("change", () => { projectFilterState.sort = sortSelect.value; draw(); });
+  sortGroup.appendChild(sortSelect);
+  filterBar.appendChild(sortGroup);
 
-  const addBtn = document.createElement("button"); addBtn.className = "btn primary"; addBtn.textContent = "+ New Project";
+  const addBtn = document.createElement("button");
+  addBtn.className = "btn primary"; addBtn.textContent = "+ Add Project";
   addBtn.addEventListener("click", () => openProjectForm(null));
   app.appendChild(addBtn);
 
@@ -568,13 +518,15 @@ function renderProjects() {
     projectFilterState.query = search.value;
     ul.innerHTML = "";
     let filtered = state.projects
-      .filter(p => !q || (p.name + " " + p.id + " " + p.phase).toLowerCase().includes(q))
+      .filter(p => !q || (p.name + " " + p.id + " " + p.phase + " " + p.status).toLowerCase().includes(q))
       .filter(p => !projectFilterState.health.size || projectFilterState.health.has(p.health));
-    const sk = sortSelect.value;
-    filtered = filtered.slice().sort((a, b) => sk === "name" ? a.name.localeCompare(b.name)
-      : sk === "completion" ? b.completion - a.completion
-      : sk === "endDate" ? new Date(a.endDate) - new Date(b.endDate)
-      : b.budget - a.budget);
+    const sk = projectFilterState.sort;
+    filtered = filtered.slice().sort((a, b) => {
+      if (sk === "name") return a.name.localeCompare(b.name);
+      if (sk === "completion") return b.completion - a.completion;
+      if (sk === "endDate") return new Date(a.endDate) - new Date(b.endDate);
+      return b.budget - a.budget;
+    });
     empty.style.display = filtered.length ? "none" : "block";
     filtered.forEach(p => ul.appendChild(projectRow(p)));
   }
@@ -582,9 +534,25 @@ function renderProjects() {
   draw();
 }
 
+function projectRow(p) {
+  const li = document.createElement("li"); li.className = "entity";
+  const left = document.createElement("div"); left.style.flex = "1"; left.style.minWidth = "220px";
+  left.innerHTML = `<div class="main"></div><div class="meta"></div>`;
+  left.querySelector(".main").textContent = p.name;
+  left.querySelector(".meta").textContent = `${p.id} · ${p.phase} · ${p.completion}% · ${money(p.spent)}/${money(p.budget)} · Lead: ${p.lead} · Due ${p.endDate} · Next: ${p.nextMilestone}`;
+  left.insertAdjacentHTML("beforeend", tag(HEALTH_LABEL[p.health], "health-" + p.health) + tag(p.status));
+  li.appendChild(left);
+  const actions = document.createElement("div"); actions.className = "actions";
+  const editBtn = document.createElement("button"); editBtn.className = "btn small"; editBtn.textContent = "Edit";
+  editBtn.addEventListener("click", () => openProjectForm(p.id));
+  actions.appendChild(editBtn);
+  li.appendChild(actions);
+  return li;
+}
+
 function openProjectForm(id) {
   const existing = id ? findProject(id) : null;
-  const draft = existing ? { ...existing } : { id: "", name: "", phase: "Setup", health: "green", completion: 0, budget: 1000, spent: 0, lead: "Kareem B.", endDate: "", nextMilestone: "" };
+  const draft = existing ? { ...existing } : { id: "", name: "", phase: "Setup", health: "green", status: "In Progress", completion: 0, budget: 1000, spent: 0, lead: "Kareem B.", endDate: "2026-12-31", nextMilestone: "Kickoff" };
   app.innerHTML = "";
   const h2 = document.createElement("h2"); h2.textContent = existing ? "Edit Project" : "New Project";
   app.appendChild(h2);
@@ -601,6 +569,7 @@ function openProjectForm(id) {
   const nameInput = document.createElement("input"); nameInput.type = "text"; nameInput.value = draft.name;
   const leadInput = document.createElement("input"); leadInput.type = "text"; leadInput.value = draft.lead;
   const phaseInput = document.createElement("input"); phaseInput.type = "text"; phaseInput.value = draft.phase;
+  const statusInput = document.createElement("input"); statusInput.type = "text"; statusInput.value = draft.status;
   const healthSelect = document.createElement("select");
   HEALTHS.forEach(h => { const o = document.createElement("option"); o.value = h; o.textContent = HEALTH_LABEL[h]; if (h === draft.health) o.selected = true; healthSelect.appendChild(o); });
   const completionInput = document.createElement("input"); completionInput.type = "number"; completionInput.min = "0"; completionInput.max = "100"; completionInput.value = draft.completion;
@@ -610,31 +579,35 @@ function openProjectForm(id) {
   const milestoneInput = document.createElement("input"); milestoneInput.type = "text"; milestoneInput.value = draft.nextMilestone;
 
   const row1 = document.createElement("div"); row1.className = "edit-row";
-  row1.append(field("Project ID", idInput), field("Project Name", nameInput), field("Lead", leadInput));
+  row1.append(field("Project Name", nameInput), field("Project ID", idInput));
   const row2 = document.createElement("div"); row2.className = "edit-row";
-  row2.append(field("Phase", phaseInput), field("Health", healthSelect), field("Completion %", completionInput));
+  row2.append(field("Lead", leadInput), field("Phase", phaseInput), field("Status", statusInput));
   const row3 = document.createElement("div"); row3.className = "edit-row";
-  row3.append(field("Budget ($)", budgetInput), field("Spent ($)", spentInput), field("Due Date", endDateInput));
+  row3.append(field("Health", healthSelect), field("Completion %", completionInput));
   const row4 = document.createElement("div"); row4.className = "edit-row";
-  row4.append(field("Next Milestone", milestoneInput));
-  panel.append(row1, row2, row3, row4);
+  row4.append(field("Budget ($)", budgetInput), field("Spent ($)", spentInput));
+  const row5 = document.createElement("div"); row5.className = "edit-row";
+  row5.append(field("Due Date", endDateInput), field("Next Milestone", milestoneInput));
+  panel.append(row1, row2, row3, row4, row5);
 
   const actions = document.createElement("div"); actions.className = "edit-actions";
   const saveBtn = document.createElement("button"); saveBtn.className = "btn primary"; saveBtn.textContent = "Save";
   saveBtn.addEventListener("click", () => {
-    const name = nameInput.value.trim() || "Untitled project";
+    const name = nameInput.value.trim() || "New Initiative";
+    const lead = leadInput.value.trim() || "Kareem B.";
     const phase = phaseInput.value.trim() || "Setup";
+    const status = statusInput.value.trim() || "In Progress";
     const health = healthSelect.value;
     const completion = Math.max(0, Math.min(100, parseInt(completionInput.value, 10) || 0));
     const budget = Math.max(0, parseInt(budgetInput.value, 10) || 0);
     const spent = Math.max(0, parseInt(spentInput.value, 10) || 0);
-    const lead = leadInput.value.trim() || "Kareem B.";
     const endDate = endDateInput.value || "2026-12-31";
     const nextMilestone = milestoneInput.value.trim() || "Kickoff";
-    if (existing) { Object.assign(existing, { name, phase, health, completion, budget, spent, lead, endDate, nextMilestone }); }
-    else {
-      const id = (idInput.value.trim() || nextId("PRJ")).toUpperCase();
-      state.projects.push({ id, name, phase, health, completion, budget, spent, lead, endDate, nextMilestone });
+    if (existing) {
+      Object.assign(existing, { name, lead, phase, status, health, completion, budget, spent, endDate, nextMilestone });
+    } else {
+      const id = (idInput.value.trim() || "NEW-" + Date.now()).toUpperCase();
+      state.projects.push({ id, name, lead, phase, status, health, completion, budget, spent, endDate, nextMilestone });
     }
     saveState(); goRoute("projects");
   });
@@ -653,48 +626,6 @@ function openProjectForm(id) {
   panel.appendChild(actions);
 }
 
-function openAlertForm(id) {
-  const existing = id ? findAlert(id) : null;
-  const draft = existing ? { ...existing } : { type: "info", message: "" };
-  app.innerHTML = "";
-  const h2 = document.createElement("h2"); h2.textContent = existing ? "Edit Alert" : "New Alert";
-  app.appendChild(h2);
-  const panel = document.createElement("div"); panel.className = "edit-panel";
-  app.appendChild(panel);
-  function field(label, input) {
-    const f = document.createElement("div"); f.className = "edit-field";
-    const l = document.createElement("label"); l.textContent = label; f.append(l, input); return f;
-  }
-  const typeSelect = document.createElement("select");
-  ALERT_TYPES.forEach(t => { const o = document.createElement("option"); o.value = t; o.textContent = t; if (t === draft.type) o.selected = true; typeSelect.appendChild(o); });
-  const msgInput = document.createElement("input"); msgInput.type = "text"; msgInput.value = draft.message;
-  const row = document.createElement("div"); row.className = "edit-row";
-  row.append(field("Type", typeSelect), field("Message", msgInput));
-  panel.appendChild(row);
-  const actions = document.createElement("div"); actions.className = "edit-actions";
-  const saveBtn = document.createElement("button"); saveBtn.className = "btn primary"; saveBtn.textContent = "Save";
-  saveBtn.addEventListener("click", () => {
-    const message = msgInput.value.trim() || "Untitled alert";
-    const type = typeSelect.value;
-    if (existing) Object.assign(existing, { type, message });
-    else state.alerts.push({ id: nextId("AL"), type, message });
-    saveState(); goRoute("dashboard");
-  });
-  const cancelBtn = document.createElement("button"); cancelBtn.className = "btn"; cancelBtn.textContent = "Cancel";
-  cancelBtn.addEventListener("click", () => goRoute("dashboard"));
-  actions.append(saveBtn, cancelBtn);
-  if (existing) {
-    const delBtn = document.createElement("button"); delBtn.className = "btn danger"; delBtn.textContent = "Delete";
-    delBtn.addEventListener("click", () => {
-      if (!confirm("Delete this alert?")) return;
-      state.alerts = state.alerts.filter(a => a.id !== existing.id);
-      saveState(); goRoute("dashboard");
-    });
-    actions.appendChild(delBtn);
-  }
-  panel.appendChild(actions);
-}
-
 // ---------- Financials ----------
 function renderFinancials() {
   app.innerHTML = "";
@@ -704,174 +635,95 @@ function renderFinancials() {
   const budget = state.projects.reduce((s, p) => s + p.budget, 0);
   const spent = state.projects.reduce((s, p) => s + p.spent, 0);
   const statGrid = document.createElement("div"); statGrid.className = "stat-grid";
-  [
-    ["Total Budget", money(budget)],
-    ["Total Spent", money(spent)],
-    ["Remaining", money(budget - spent)],
-    ["Budget Used", (budget ? Math.round(spent / budget * 100) : 0) + "%"],
-  ].forEach(([label, num]) => {
-    const card = document.createElement("div"); card.className = "stat-card";
-    card.innerHTML = `<div class="num"></div><div class="label"></div>`;
-    card.querySelector(".num").textContent = num;
-    card.querySelector(".label").textContent = label;
-    statGrid.appendChild(card);
-  });
+  statGrid.append(
+    statCard("Total Budget", money(budget)),
+    statCard("Total Spent", money(spent)),
+    statCard("Remaining", money(budget - spent)),
+    statCard("Budget Used", (budget ? Math.round(spent / budget * 100) : 0) + "%"),
+  );
   app.appendChild(statGrid);
 
-  const exportBtn = document.createElement("button"); exportBtn.className = "btn"; exportBtn.textContent = "Export CSV";
+  const exportBtn = document.createElement("button");
+  exportBtn.className = "btn"; exportBtn.textContent = "Export CSV";
   exportBtn.addEventListener("click", () => {
-    const rows = [["ID", "Name", "Budget", "Spent", "Completion", "Health"]].concat(state.projects.map(p => [p.id, p.name, p.budget, p.spent, p.completion + "%", HEALTH_LABEL[p.health]]));
-    const csv = rows.map(r => r.map(c => { c = ("" + c).replace(/"/g, '""'); return /[",]/.test(c) ? '"' + c + '"' : c; }).join(",")).join("\n");
-    const u = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); const a = document.createElement("a"); a.href = u; a.download = "portfolio-financials.csv"; a.click(); URL.revokeObjectURL(u);
+    const rows = [["ID", "Name", "Budget", "Spent", "Completion", "Status"]].concat(
+      state.projects.map(p => [p.id, p.name, p.budget, p.spent, p.completion + "%", p.status])
+    );
+    const csv = rows.map(r => r.map(c => { c = String(c).replace(/"/g, '""'); return /[",]/.test(c) ? `"${c}"` : c; }).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "portfolio-financials.csv"; a.click();
+    URL.revokeObjectURL(url);
   });
   app.appendChild(exportBtn);
 
-  const revSec = document.createElement("div"); revSec.className = "section";
-  revSec.innerHTML = "<h2>Revenue Trend</h2>";
-  app.appendChild(revSec);
-  const addRevBtn = document.createElement("button"); addRevBtn.className = "btn small"; addRevBtn.textContent = "+ Add Month";
-  addRevBtn.addEventListener("click", () => openRevenueForm(null));
-  revSec.appendChild(addRevBtn);
-  const revMax = Math.max(...state.revenueData.map(r => r.revenue), 1);
-  state.revenueData.forEach(r => {
-    const row = barRow(r.month, r.revenue, revMax, money(r.revenue));
-    row.style.cursor = "pointer";
-    row.addEventListener("click", () => openRevenueForm(r.id));
-    revSec.appendChild(row);
-  });
+  const revSection = document.createElement("div"); revSection.className = "section";
+  revSection.innerHTML = "<h2>Revenue Trend</h2>";
+  app.appendChild(revSection);
+  const revMax = Math.max(...state.financials.revenueData.map(d => d.revenue), 1);
+  state.financials.revenueData.forEach(d => revSection.appendChild(barRow(d.name, d.revenue, revMax, money(d.revenue))));
 
-  const allocSec = document.createElement("div"); allocSec.className = "section";
-  allocSec.innerHTML = "<h2>Budget Allocation</h2>";
-  app.appendChild(allocSec);
-  const addAllocBtn = document.createElement("button"); addAllocBtn.className = "btn small"; addAllocBtn.textContent = "+ Add Category";
-  addAllocBtn.addEventListener("click", () => openBudgetAllocForm(null));
-  allocSec.appendChild(addAllocBtn);
-  const allocMax = Math.max(...state.budgetAllocation.map(b => b.value), 1);
-  state.budgetAllocation.forEach(b => {
-    const row = barRow(b.name, b.value, allocMax, b.value + "%");
-    row.style.cursor = "pointer";
-    row.addEventListener("click", () => openBudgetAllocForm(b.id));
-    allocSec.appendChild(row);
-  });
+  const allocSection = document.createElement("div"); allocSection.className = "section";
+  allocSection.innerHTML = "<h2>Budget Allocation by Category</h2>";
+  app.appendChild(allocSection);
+  const allocMax = Math.max(...state.financials.budgetAllocation.map(d => d.value), 1);
+  state.financials.budgetAllocation.forEach(d => allocSection.appendChild(barRow(d.name, d.value, allocMax, d.value + "%")));
 
-  const projSec = document.createElement("div"); projSec.className = "section";
-  projSec.innerHTML = "<h2>Budget by Project</h2>";
-  app.appendChild(projSec);
+  const projSection = document.createElement("div"); projSection.className = "section";
+  projSection.innerHTML = "<h2>Budget by Project (spent vs. budget)</h2>";
+  app.appendChild(projSection);
   state.projects.forEach(p => {
-    const row = barRow(p.id, p.spent, Math.max(p.budget, p.spent), `${money(p.spent)} / ${money(p.budget)}`);
-    if (p.spent > p.budget) row.querySelector(".bar-fill").classList.add("over");
-    else if (p.budget && p.spent / p.budget >= 0.8) row.querySelector(".bar-fill").classList.add("warn");
-    projSec.appendChild(row);
+    const pct = p.budget ? Math.round(p.spent / p.budget * 100) : 0;
+    const cls = pct >= 90 ? "over" : pct >= 70 ? "warn" : "";
+    projSection.appendChild(barRow(p.id, p.spent, Math.max(p.budget, p.spent, 1), `${money(p.spent)} / ${money(p.budget)}`, cls));
   });
-}
-
-function openRevenueForm(id) {
-  const existing = id ? findRevenueRow(id) : null;
-  const draft = existing ? { ...existing } : { month: "", revenue: 0 };
-  app.innerHTML = "";
-  const h2 = document.createElement("h2"); h2.textContent = existing ? "Edit Revenue Month" : "New Revenue Month";
-  app.appendChild(h2);
-  const panel = document.createElement("div"); panel.className = "edit-panel";
-  app.appendChild(panel);
-  function field(label, input) { const f = document.createElement("div"); f.className = "edit-field"; const l = document.createElement("label"); l.textContent = label; f.append(l, input); return f; }
-  const monthInput = document.createElement("input"); monthInput.type = "text"; monthInput.value = draft.month; monthInput.placeholder = "Aug";
-  const revInput = document.createElement("input"); revInput.type = "number"; revInput.min = "0"; revInput.value = draft.revenue;
-  const row = document.createElement("div"); row.className = "edit-row";
-  row.append(field("Month", monthInput), field("Revenue ($)", revInput));
-  panel.appendChild(row);
-  const actions = document.createElement("div"); actions.className = "edit-actions";
-  const saveBtn = document.createElement("button"); saveBtn.className = "btn primary"; saveBtn.textContent = "Save";
-  saveBtn.addEventListener("click", () => {
-    const month = monthInput.value.trim() || "—";
-    const revenue = Math.max(0, parseInt(revInput.value, 10) || 0);
-    if (existing) Object.assign(existing, { month, revenue });
-    else state.revenueData.push({ id: nextId("R"), month, revenue });
-    saveState(); goRoute("financials");
-  });
-  const cancelBtn = document.createElement("button"); cancelBtn.className = "btn"; cancelBtn.textContent = "Cancel";
-  cancelBtn.addEventListener("click", () => goRoute("financials"));
-  actions.append(saveBtn, cancelBtn);
-  if (existing) {
-    const delBtn = document.createElement("button"); delBtn.className = "btn danger"; delBtn.textContent = "Delete";
-    delBtn.addEventListener("click", () => {
-      if (!confirm("Delete this revenue entry?")) return;
-      state.revenueData = state.revenueData.filter(r => r.id !== existing.id);
-      saveState(); goRoute("financials");
-    });
-    actions.appendChild(delBtn);
-  }
-  panel.appendChild(actions);
-}
-
-function openBudgetAllocForm(id) {
-  const existing = id ? findBudgetRow(id) : null;
-  const draft = existing ? { ...existing } : { name: "", value: 0 };
-  app.innerHTML = "";
-  const h2 = document.createElement("h2"); h2.textContent = existing ? "Edit Allocation" : "New Allocation";
-  app.appendChild(h2);
-  const panel = document.createElement("div"); panel.className = "edit-panel";
-  app.appendChild(panel);
-  function field(label, input) { const f = document.createElement("div"); f.className = "edit-field"; const l = document.createElement("label"); l.textContent = label; f.append(l, input); return f; }
-  const nameInput = document.createElement("input"); nameInput.type = "text"; nameInput.value = draft.name; nameInput.placeholder = "Category";
-  const valInput = document.createElement("input"); valInput.type = "number"; valInput.min = "0"; valInput.value = draft.value;
-  const row = document.createElement("div"); row.className = "edit-row";
-  row.append(field("Category", nameInput), field("Allocation (%)", valInput));
-  panel.appendChild(row);
-  const actions = document.createElement("div"); actions.className = "edit-actions";
-  const saveBtn = document.createElement("button"); saveBtn.className = "btn primary"; saveBtn.textContent = "Save";
-  saveBtn.addEventListener("click", () => {
-    const name = nameInput.value.trim() || "Other";
-    const value = Math.max(0, parseInt(valInput.value, 10) || 0);
-    if (existing) Object.assign(existing, { name, value });
-    else state.budgetAllocation.push({ id: nextId("B"), name, value });
-    saveState(); goRoute("financials");
-  });
-  const cancelBtn = document.createElement("button"); cancelBtn.className = "btn"; cancelBtn.textContent = "Cancel";
-  cancelBtn.addEventListener("click", () => goRoute("financials"));
-  actions.append(saveBtn, cancelBtn);
-  if (existing) {
-    const delBtn = document.createElement("button"); delBtn.className = "btn danger"; delBtn.textContent = "Delete";
-    delBtn.addEventListener("click", () => {
-      if (!confirm("Delete this allocation category?")) return;
-      state.budgetAllocation = state.budgetAllocation.filter(b => b.id !== existing.id);
-      saveState(); goRoute("financials");
-    });
-    actions.appendChild(delBtn);
-  }
-  panel.appendChild(actions);
 }
 
 // ---------- Analytics ----------
+const taskFilterState = { priority: new Set() };
 function renderAnalytics() {
   app.innerHTML = "";
   const h2 = document.createElement("h2"); h2.textContent = "Analytics";
   app.appendChild(h2);
 
-  const cmpSec = document.createElement("div"); cmpSec.className = "section";
-  cmpSec.innerHTML = "<h2>Completion by Project</h2>";
-  app.appendChild(cmpSec);
-  state.projects.slice().sort((a, b) => b.completion - a.completion).forEach(p => cmpSec.appendChild(barRow(p.id, p.completion, 100, p.completion + "%")));
-
-  const utilSec = document.createElement("div"); utilSec.className = "section";
-  utilSec.innerHTML = "<h2>Budget Utilization</h2>";
-  app.appendChild(utilSec);
-  state.projects.map(p => ({ id: p.id, u: p.budget ? Math.round(p.spent / p.budget * 100) : 0 })).sort((a, b) => b.u - a.u).forEach(r => {
-    const row = barRow(r.id, r.u, 100, r.u + "%");
-    if (r.u >= 90) row.querySelector(".bar-fill").classList.add("over");
-    else if (r.u >= 70) row.querySelector(".bar-fill").classList.add("warn");
-    utilSec.appendChild(row);
+  const compSection = document.createElement("div"); compSection.className = "section";
+  compSection.innerHTML = "<h2>Completion by Project</h2>";
+  app.appendChild(compSection);
+  state.projects.slice().sort((a, b) => b.completion - a.completion).forEach(p => {
+    compSection.appendChild(barRow(p.id, p.completion, 100, p.completion + "%"));
   });
 
-  const taskSec = document.createElement("div"); taskSec.className = "section";
-  taskSec.innerHTML = `<h2>Upcoming Tasks <span class="count">(${state.tasks.length})</span></h2>`;
-  app.appendChild(taskSec);
-  const addTaskBtn = document.createElement("button"); addTaskBtn.className = "btn primary"; addTaskBtn.textContent = "+ New Task";
-  addTaskBtn.addEventListener("click", () => openTaskForm(null));
-  taskSec.appendChild(addTaskBtn);
-  if (!state.tasks.length) taskSec.appendChild(emptyMsg("No tasks yet."));
-  const ul = document.createElement("ul"); ul.className = "entities"; ul.style.marginTop = ".7rem";
-  taskSec.appendChild(ul);
-  state.tasks.slice().sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)).forEach(t => ul.appendChild(taskRow(t)));
+  const utilSection = document.createElement("div"); utilSection.className = "section";
+  utilSection.innerHTML = "<h2>Budget Utilization</h2>";
+  app.appendChild(utilSection);
+  const utilRows = state.projects.map(p => ({ id: p.id, u: p.budget ? Math.round(p.spent / p.budget * 100) : 0 })).sort((a, b) => b.u - a.u);
+  utilRows.forEach(r => {
+    const cls = r.u >= 90 ? "over" : r.u >= 70 ? "warn" : "";
+    utilSection.appendChild(barRow(r.id, r.u, 100, r.u + "%", cls));
+  });
+
+  const taskSection = document.createElement("div"); taskSection.className = "section";
+  taskSection.innerHTML = `<h2>Upcoming Tasks <span class="count">(${state.tasks.length})</span></h2>`;
+  app.appendChild(taskSection);
+  const filterBar = document.createElement("div"); filterBar.className = "filter-bar";
+  taskSection.appendChild(filterBar);
+  filterBar.appendChild(pillGroup("Priority", PRIORITIES, taskFilterState.priority, () => drawTasks()));
+  const addBtn = document.createElement("button");
+  addBtn.className = "btn primary"; addBtn.textContent = "+ Add Task";
+  addBtn.addEventListener("click", () => openTaskForm(null));
+  taskSection.appendChild(addBtn);
+  const ul = document.createElement("ul"); ul.className = "entities"; ul.style.marginTop = "1rem";
+  taskSection.appendChild(ul);
+  const empty = emptyMsg("No tasks match."); empty.style.display = "none";
+  taskSection.appendChild(empty);
+
+  function drawTasks() {
+    ul.innerHTML = "";
+    const filtered = state.tasks.filter(t => !taskFilterState.priority.size || taskFilterState.priority.has(t.priority));
+    empty.style.display = filtered.length ? "none" : "block";
+    filtered.forEach(t => ul.appendChild(taskRow(t)));
+  }
+  drawTasks();
 }
 
 function taskRow(t) {
@@ -879,7 +731,7 @@ function taskRow(t) {
   const left = document.createElement("div");
   left.innerHTML = `<div class="main"></div><div class="meta"></div>`;
   left.querySelector(".main").textContent = t.name;
-  left.querySelector(".meta").textContent = `${t.project} · due ${t.dueDate}`;
+  left.querySelector(".meta").textContent = `${t.project} · Due ${t.dueDate}`;
   left.insertAdjacentHTML("beforeend", tag(t.priority, "pri-" + t.priority.toLowerCase()));
   li.appendChild(left);
   const actions = document.createElement("div"); actions.className = "actions";
@@ -898,26 +750,28 @@ function openTaskForm(id) {
   app.appendChild(h2);
   const panel = document.createElement("div"); panel.className = "edit-panel";
   app.appendChild(panel);
-  function field(label, input) { const f = document.createElement("div"); f.className = "edit-field"; const l = document.createElement("label"); l.textContent = label; f.append(l, input); return f; }
+  function field(label, input) {
+    const f = document.createElement("div"); f.className = "edit-field";
+    const l = document.createElement("label"); l.textContent = label; f.append(l, input); return f;
+  }
   const nameInput = document.createElement("input"); nameInput.type = "text"; nameInput.value = draft.name;
-  const projectSelect = document.createElement("select");
-  const personalOpt = document.createElement("option"); personalOpt.value = "Personal"; personalOpt.textContent = "Personal"; projectSelect.appendChild(personalOpt);
-  state.projects.forEach(p => { const o = document.createElement("option"); o.value = p.id; o.textContent = p.id; if (p.id === draft.project) o.selected = true; projectSelect.appendChild(o); });
-  if (draft.project === "Personal") personalOpt.selected = true;
-  const dueDateInput = document.createElement("input"); dueDateInput.type = "date"; dueDateInput.value = /^\d{4}-\d{2}-\d{2}$/.test(draft.dueDate) ? draft.dueDate : "";
+  const projectInput = document.createElement("input"); projectInput.type = "text"; projectInput.value = draft.project; projectInput.placeholder = "Project ID or name";
+  const dueInput = document.createElement("input"); dueInput.type = "date"; dueInput.value = /^\d{4}-\d{2}-\d{2}$/.test(draft.dueDate) ? draft.dueDate : "";
   const prioritySelect = document.createElement("select");
   PRIORITIES.forEach(p => { const o = document.createElement("option"); o.value = p; o.textContent = p; if (p === draft.priority) o.selected = true; prioritySelect.appendChild(o); });
+
   const row1 = document.createElement("div"); row1.className = "edit-row";
-  row1.append(field("Task", nameInput), field("Project", projectSelect));
+  row1.append(field("Task Name", nameInput), field("Project", projectInput));
   const row2 = document.createElement("div"); row2.className = "edit-row";
-  row2.append(field("Due Date", dueDateInput), field("Priority", prioritySelect));
+  row2.append(field("Due Date", dueInput), field("Priority", prioritySelect));
   panel.append(row1, row2);
+
   const actions = document.createElement("div"); actions.className = "edit-actions";
   const saveBtn = document.createElement("button"); saveBtn.className = "btn primary"; saveBtn.textContent = "Save";
   saveBtn.addEventListener("click", () => {
     const name = nameInput.value.trim() || "Untitled task";
-    const project = projectSelect.value;
-    const dueDate = dueDateInput.value || "2026-12-31";
+    const project = projectInput.value.trim() || "Unassigned";
+    const dueDate = dueInput.value || "2026-12-31";
     const priority = prioritySelect.value;
     if (existing) Object.assign(existing, { name, project, dueDate, priority });
     else state.tasks.push({ id: nextId("T"), name, project, dueDate, priority });
@@ -941,8 +795,8 @@ function openTaskForm(id) {
 // ---------- Wiki ----------
 function renderWiki() {
   app.innerHTML = "";
-  const phases = ["Ideate", "Scope", "Research", "Setup", "Develop", "Document", "Educate", "Resource", "Finance", "Conduct", "Control", "Network", "Social", "Market", "Optimize", "Maintain"];
   const wiki = document.createElement("div"); wiki.className = "wiki";
+  const phases = ["Ideate", "Scope", "Research", "Setup", "Develop", "Document", "Educate", "Resource", "Finance", "Conduct", "Control", "Network", "Social", "Market", "Optimize", "Maintain"];
   wiki.innerHTML =
     "<h2>Introduction: From Tangle to Triumph</h2>"
     + "<p>Have you ever stared at your to-do list, coffee in hand, and felt completely lost — despite meticulously tracking every task? This knowledge base bridges that gap, transforming your workflow from a mere list into a dynamic, multi-layered productivity engine that connects daily effort to your grandest ambitions.</p>"
@@ -953,7 +807,7 @@ function renderWiki() {
     + "<h2>Key Projects &amp; Initiatives</h2>"
     + `<p>The portfolio currently orchestrates ${state.projects.length} strategic initiatives:</p>`
     + "<table><thead><tr><th>ID</th><th>Initiative</th><th>Phase</th><th>Status</th></tr></thead><tbody>"
-    + state.projects.map(p => `<tr><td>${escHtml(p.id)}</td><td>${escHtml(p.name)}</td><td>${escHtml(p.phase)}</td><td>${escHtml(HEALTH_LABEL[p.health])}</td></tr>`).join("")
+    + state.projects.map(p => `<tr><td>${p.id}</td><td>${p.name}</td><td>${p.phase}</td><td>${p.status}</td></tr>`).join("")
     + "</tbody></table>"
     + "<h2>Work Breakdown Structure (WBS)</h2>"
     + "<p>A WBS is a hierarchical decomposition of the total scope of work required to accomplish the project objectives and create the required deliverables. It breaks work into smaller, manageable components — each mapped to one of the operational phases below.</p>"
@@ -971,28 +825,163 @@ function renderSettings() {
 
   const panel = document.createElement("div"); panel.className = "edit-panel";
   app.appendChild(panel);
-  function field(label, input) { const f = document.createElement("div"); f.className = "edit-field"; const l = document.createElement("label"); l.textContent = label; f.append(l, input); return f; }
-
+  function field(label, input) {
+    const f = document.createElement("div"); f.className = "edit-field";
+    const l = document.createElement("label"); l.textContent = label; f.append(l, input); return f;
+  }
   const healthInput = document.createElement("input"); healthInput.type = "number"; healthInput.min = "0"; healthInput.max = "10"; healthInput.step = "0.1"; healthInput.value = state.settings.portfolioHealth;
-  const utilInput = document.createElement("input"); utilInput.type = "number"; utilInput.min = "0"; utilInput.max = "100"; utilInput.value = state.settings.resourceUtilization;
   const targetInput = document.createElement("input"); targetInput.type = "number"; targetInput.min = "0"; targetInput.value = state.settings.revenueTarget;
   const revenueInput = document.createElement("input"); revenueInput.type = "number"; revenueInput.min = "0"; revenueInput.value = state.settings.currentRevenue;
+  const utilInput = document.createElement("input"); utilInput.type = "number"; utilInput.min = "0"; utilInput.max = "100"; utilInput.value = state.settings.resourceUtilization;
+  healthInput.addEventListener("change", () => { state.settings.portfolioHealth = Math.max(0, Math.min(10, parseFloat(healthInput.value) || 0)); saveState(); });
+  targetInput.addEventListener("change", () => { state.settings.revenueTarget = Math.max(0, parseInt(targetInput.value, 10) || 0); saveState(); });
+  revenueInput.addEventListener("change", () => { state.settings.currentRevenue = Math.max(0, parseInt(revenueInput.value, 10) || 0); saveState(); });
+  utilInput.addEventListener("change", () => { state.settings.resourceUtilization = Math.max(0, Math.min(100, parseInt(utilInput.value, 10) || 0)); saveState(); });
 
   const row1 = document.createElement("div"); row1.className = "edit-row";
-  row1.append(field("Portfolio Health (0-10)", healthInput), field("Resource Utilization (%)", utilInput));
+  row1.append(field("Portfolio Health Score (/10)", healthInput), field("Resource Utilization (%)", utilInput));
   const row2 = document.createElement("div"); row2.className = "edit-row";
   row2.append(field("Revenue Target ($)", targetInput), field("Current Revenue ($)", revenueInput));
   panel.append(row1, row2);
 
-  healthInput.addEventListener("change", () => { state.settings.portfolioHealth = Math.max(0, Math.min(10, parseFloat(healthInput.value) || 0)); saveState(); });
-  utilInput.addEventListener("change", () => { state.settings.resourceUtilization = Math.max(0, Math.min(100, parseInt(utilInput.value, 10) || 0)); saveState(); });
-  targetInput.addEventListener("change", () => { state.settings.revenueTarget = Math.max(0, parseInt(targetInput.value, 10) || 0); saveState(); });
-  revenueInput.addEventListener("change", () => { state.settings.currentRevenue = Math.max(0, parseInt(revenueInput.value, 10) || 0); saveState(); });
+  const alertSection = document.createElement("div"); alertSection.className = "section";
+  alertSection.innerHTML = `<h2>Alerts <span class="count">(${state.alerts.length})</span></h2>`;
+  app.appendChild(alertSection);
+  const addAlertBtn = document.createElement("button");
+  addAlertBtn.className = "btn primary"; addAlertBtn.textContent = "+ Add Alert";
+  addAlertBtn.addEventListener("click", () => openAlertForm(null));
+  alertSection.appendChild(addAlertBtn);
+  const alertUl = document.createElement("ul"); alertUl.className = "entities"; alertUl.style.marginTop = "1rem";
+  alertSection.appendChild(alertUl);
+  if (!state.alerts.length) alertSection.appendChild(emptyMsg("No alerts."));
+  state.alerts.forEach(a => alertUl.appendChild(alertEditRow(a)));
 
-  const sec = document.createElement("div"); sec.className = "section";
-  sec.innerHTML = "<h2>Data</h2><p style='color:var(--text-dim);font-size:.88rem;'>Use the Export / Import / Reset controls above the nav bar to back up your edits, load a saved file, or start over from the original demo data.</p>";
-  app.appendChild(sec);
+  const dataSection = document.createElement("div"); dataSection.className = "section";
+  dataSection.innerHTML = "<h2>Data</h2><p style='color:var(--text-dim);font-size:.88rem;'>Use the Export / Import / Reset controls above the nav bar to back up your edits, load a saved file, or start over from the original demo data.</p>";
+  app.appendChild(dataSection);
 }
+
+function alertEditRow(a) {
+  const li = document.createElement("li"); li.className = "entity";
+  const left = document.createElement("div"); left.style.flex = "1"; left.style.minWidth = "220px";
+  left.innerHTML = `<div class="main"></div>`;
+  left.querySelector(".main").textContent = a.message;
+  left.insertAdjacentHTML("beforeend", tag(a.type));
+  li.appendChild(left);
+  const actions = document.createElement("div"); actions.className = "actions";
+  const editBtn = document.createElement("button"); editBtn.className = "btn small"; editBtn.textContent = "Edit";
+  editBtn.addEventListener("click", () => openAlertForm(a.id));
+  actions.appendChild(editBtn);
+  li.appendChild(actions);
+  return li;
+}
+
+function openAlertForm(id) {
+  const existing = id ? findAlert(id) : null;
+  const draft = existing ? { ...existing } : { type: "info", message: "" };
+  app.innerHTML = "";
+  const h2 = document.createElement("h2"); h2.textContent = existing ? "Edit Alert" : "New Alert";
+  app.appendChild(h2);
+  const panel = document.createElement("div"); panel.className = "edit-panel";
+  app.appendChild(panel);
+  function field(label, input) {
+    const f = document.createElement("div"); f.className = "edit-field";
+    const l = document.createElement("label"); l.textContent = label; f.append(l, input); return f;
+  }
+  const typeSelect = document.createElement("select");
+  ALERT_TYPES.forEach(t => { const o = document.createElement("option"); o.value = t; o.textContent = t; if (t === draft.type) o.selected = true; typeSelect.appendChild(o); });
+  const messageInput = document.createElement("textarea"); messageInput.rows = 3; messageInput.value = draft.message;
+
+  const row = document.createElement("div"); row.className = "edit-row";
+  row.append(field("Type", typeSelect), field("Message", messageInput));
+  panel.appendChild(row);
+
+  const actions = document.createElement("div"); actions.className = "edit-actions";
+  const saveBtn = document.createElement("button"); saveBtn.className = "btn primary"; saveBtn.textContent = "Save";
+  saveBtn.addEventListener("click", () => {
+    const type = typeSelect.value;
+    const message = messageInput.value.trim() || "New alert.";
+    if (existing) Object.assign(existing, { type, message });
+    else state.alerts.push({ id: nextId("A"), type, message });
+    saveState(); goRoute("settings");
+  });
+  const cancelBtn = document.createElement("button"); cancelBtn.className = "btn"; cancelBtn.textContent = "Cancel";
+  cancelBtn.addEventListener("click", () => goRoute("settings"));
+  actions.append(saveBtn, cancelBtn);
+  if (existing) {
+    const delBtn = document.createElement("button"); delBtn.className = "btn danger"; delBtn.textContent = "Delete";
+    delBtn.addEventListener("click", () => {
+      if (!confirm("Delete this alert?")) return;
+      state.alerts = state.alerts.filter(a => a.id !== existing.id);
+      saveState(); goRoute("settings");
+    });
+    actions.appendChild(delBtn);
+  }
+  panel.appendChild(actions);
+}
+
+// ---------- Smart Assistant (local, offline, rule-based) ----------
+function assistAnswer(q) {
+  q = q.toLowerCase();
+  const P = state.projects;
+  const tot = k => P.reduce((s, p) => s + p[k], 0);
+  if (/at.?risk|yellow|concern|attention/.test(q)) {
+    const r = P.filter(p => p.health !== "green");
+    return r.length ? `${r.length} projects need attention:\n` + r.map(p => `• ${p.id} — ${p.name} (${p.status})`).join("\n") : "Good news — every project is currently On Track.";
+  }
+  if (/budget|spent|cost|money|utili/.test(q)) {
+    const b = tot("budget"), s = tot("spent");
+    const over = P.filter(p => p.budget && p.spent / p.budget >= 0.9);
+    return `Total budget is ${money(b)}, with ${money(s)} spent (${b ? Math.round(s / b * 100) : 0}% used). ` + (over.length ? `Watch: ${over.map(p => p.id).join(", ")} near/over budget.` : "No projects are over budget.");
+  }
+  if (/health|score/.test(q)) {
+    return `Portfolio health is ${state.settings.portfolioHealth.toFixed(1)}/10. Resource utilization is ${state.settings.resourceUtilization}%.`;
+  }
+  if (/revenue|target|sales/.test(q)) {
+    const t = state.settings.revenueTarget || 1;
+    return `Revenue is ${money(state.settings.currentRevenue)} of a ${money(state.settings.revenueTarget)} target (${Math.round(state.settings.currentRevenue / t * 100)}%).`;
+  }
+  if (/how many|count|number of|list.*project|all project/.test(q)) {
+    const top = P.slice().sort((a, b) => b.completion - a.completion).slice(0, 3).map(p => `${p.id} (${p.completion}%)`).join(", ");
+    return `There are ${P.length} active projects. Top by completion: ${top}.`;
+  }
+  if (/milestone|due|task|deadline|upcoming/.test(q)) {
+    const t = state.tasks.filter(x => x.priority === "High");
+    return t.length ? "High-priority items:\n" + t.map(x => `• ${x.name} (${x.dueDate})`).join("\n") : "No high-priority tasks right now.";
+  }
+  if (/on track|green|good|healthy/.test(q)) {
+    const g = P.filter(p => p.health === "green");
+    return `${g.length} projects are On Track. ${g.slice(0, 4).map(p => p.id).join(", ")}${g.length > 4 ? "…" : ""}`;
+  }
+  return "I can help with your portfolio. Try asking about at-risk projects, budget, portfolio health, revenue, or upcoming deadlines.";
+}
+function assistPush(role, text) {
+  const body = document.getElementById("assistBody");
+  const m = document.createElement("div"); m.className = "msg " + role; m.textContent = text;
+  body.appendChild(m); body.scrollTop = body.scrollHeight;
+}
+function assistSend(text) {
+  const input = document.getElementById("assistInput");
+  const v = (text || input.value).trim(); if (!v) return;
+  assistPush("user", v); input.value = "";
+  setTimeout(() => assistPush("assistant", assistAnswer(v)), 200);
+}
+function wireAssistant() {
+  const panel = document.getElementById("assistPanel");
+  document.getElementById("assistFab").addEventListener("click", () => panel.classList.add("open"));
+  document.getElementById("assistClose").addEventListener("click", () => panel.classList.remove("open"));
+  document.getElementById("assistSend").addEventListener("click", () => assistSend());
+  document.getElementById("assistInput").addEventListener("keydown", e => { if (e.key === "Enter") assistSend(); });
+  const chips = ["At-risk projects", "Budget summary", "Portfolio health", "Upcoming deadlines"];
+  const chipBar = document.getElementById("assistChips");
+  chips.forEach(c => {
+    const b = document.createElement("button"); b.textContent = c;
+    b.addEventListener("click", () => assistSend(c));
+    chipBar.appendChild(b);
+  });
+  assistPush("assistant", "Hello! I'm your portfolio assistant. Ask me about projects, budgets, health, or deadlines — or tap a suggestion below.");
+}
+wireAssistant();
 
 render();
 </script>
