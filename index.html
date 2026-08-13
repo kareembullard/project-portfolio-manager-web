@@ -60,7 +60,8 @@
   .pill.active { background: var(--accent-dim); color: var(--accent); border-color: transparent; font-weight: 600; }
 
   ul.entities { list-style: none; margin: 0; padding: 0; }
-  li.entity { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: .65rem .9rem; margin-bottom: .5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .4rem; }
+  li.entity { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: .65rem .9rem; margin-bottom: .5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .4rem; cursor: pointer; }
+  li.entity:hover { border-color: var(--accent); }
   li.entity .main { font-weight: 600; font-size: .92rem; }
   li.entity .meta { font-size: .78rem; color: var(--text-dim); }
   li.entity .actions { display: flex; gap: .4rem; }
@@ -499,6 +500,7 @@ function noticeRow(a) {
 
 function projectSummaryRow(p) {
   const li = document.createElement("li"); li.className = "entity";
+  li.addEventListener("click", () => { location.hash = "#/projects"; setTimeout(() => openProjectForm(p.id), 0); });
   const left = document.createElement("div"); left.style.flex = "1"; left.style.minWidth = "220px";
   left.innerHTML = `<div class="main"></div><div class="meta"></div>`;
   left.querySelector(".main").textContent = p.name;
@@ -570,17 +572,13 @@ function renderProjects() {
 
 function projectRow(p) {
   const li = document.createElement("li"); li.className = "entity";
+  li.addEventListener("click", () => openProjectForm(p.id));
   const left = document.createElement("div"); left.style.flex = "1"; left.style.minWidth = "220px";
   left.innerHTML = `<div class="main"></div><div class="meta"></div>`;
   left.querySelector(".main").textContent = p.name;
   left.querySelector(".meta").textContent = `${p.id} · ${p.phase} · ${p.completion}% · ${money(p.spent)}/${money(p.budget)} · Lead: ${p.lead} · Due ${p.endDate} · Next: ${p.nextMilestone}`;
   left.insertAdjacentHTML("beforeend", tag(HEALTH_LABEL[p.health], "health-" + p.health) + tag(p.status));
   li.appendChild(left);
-  const actions = document.createElement("div"); actions.className = "actions";
-  const editBtn = document.createElement("button"); editBtn.className = "btn small"; editBtn.textContent = "Edit";
-  editBtn.addEventListener("click", () => openProjectForm(p.id));
-  actions.appendChild(editBtn);
-  li.appendChild(actions);
   return li;
 }
 
@@ -762,17 +760,13 @@ function renderAnalytics() {
 
 function taskRow(t) {
   const li = document.createElement("li"); li.className = "entity";
+  li.addEventListener("click", () => openTaskForm(t.id));
   const left = document.createElement("div");
   left.innerHTML = `<div class="main"></div><div class="meta"></div>`;
   left.querySelector(".main").textContent = t.name;
   left.querySelector(".meta").textContent = `${t.project} · Due ${t.dueDate}`;
   left.insertAdjacentHTML("beforeend", tag(t.priority, "pri-" + t.priority.toLowerCase()));
   li.appendChild(left);
-  const actions = document.createElement("div"); actions.className = "actions";
-  const editBtn = document.createElement("button"); editBtn.className = "btn small"; editBtn.textContent = "Edit";
-  editBtn.addEventListener("click", () => openTaskForm(t.id));
-  actions.appendChild(editBtn);
-  li.appendChild(actions);
   return li;
 }
 
@@ -897,16 +891,12 @@ function renderSettings() {
 
 function alertEditRow(a) {
   const li = document.createElement("li"); li.className = "entity";
+  li.addEventListener("click", () => openAlertForm(a.id));
   const left = document.createElement("div"); left.style.flex = "1"; left.style.minWidth = "220px";
   left.innerHTML = `<div class="main"></div>`;
   left.querySelector(".main").textContent = a.message;
   left.insertAdjacentHTML("beforeend", tag(a.type));
   li.appendChild(left);
-  const actions = document.createElement("div"); actions.className = "actions";
-  const editBtn = document.createElement("button"); editBtn.className = "btn small"; editBtn.textContent = "Edit";
-  editBtn.addEventListener("click", () => openAlertForm(a.id));
-  actions.appendChild(editBtn);
-  li.appendChild(actions);
   return li;
 }
 
